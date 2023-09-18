@@ -1,0 +1,12 @@
+package com.example.Lead.Generation.service;
+
+import com.example.Lead.Generation.model.Lead;
+import com.example.Lead.Generation.model.LeadResponse;
+
+public interface ILeadService {
+
+    LeadResponse createLead(Lead lead, LeadResponse leadResponse);
+
+    void deletePreviousLeadIfExists(Lead lead);
+
+}

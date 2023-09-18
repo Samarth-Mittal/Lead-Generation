@@ -1,0 +1,49 @@
+package com.example.Lead.Generation.service;
+
+import com.example.Lead.Generation.model.Error;
+import com.example.Lead.Generation.model.Lead;
+import com.example.Lead.Generation.model.LeadResponse;
+import com.example.Lead.Generation.model.Leads;
+import com.example.Lead.Generation.repository.LeadRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+
+@Service
+public class LeadServiceImpl implements ILeadService {
+
+    private final LeadRepository leadRepository;
+
+    @Autowired
+    public LeadServiceImpl(LeadRepository leadRepository) {
+        this.leadRepository = leadRepository;
+    }
+
+    @Override
+    public LeadResponse createLead(Lead lead, LeadResponse leadResponse) {
+        deletePreviousLeadIfExists(lead);
+        try {
+            Leads leads = leadRepository.save(lead.toLeads());
+            leadResponse.setResponse("success");
+            leadResponse.setData(leads);
+            leadResponse.setErrors(null);
+            return leadResponse;
+        } catch (IllegalArgumentException e) {
+            leadResponse.setResponse("failure");
+            ArrayList<Error> errors = leadResponse.getErrors();
+            errors.add(new Error(e.getLocalizedMessage()));
+            leadResponse.setErrors(errors);
+            leadResponse.setData(null);
+            return leadResponse;
+        }
+    }
+
+    @Override
+    public void deletePreviousLeadIfExists(Lead lead) {
+        Leads leads = leadRepository.findByEmailId(lead.getEmailId());
+        if (leads != null) {
+            leadRepository.delete(leads);
+        }
+    }
+}
